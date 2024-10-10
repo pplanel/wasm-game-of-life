@@ -4,11 +4,11 @@ use fixedbitset::FixedBitSet;
 
 mod utils;
 
-macro_rules! log {
-    ( $($t:tt)*) => {
-        web_sys::console::log_1(&format!( $($t)*).into())
-    };
-}
+// macro_rules! log {
+//     ( $($t:tt)*) => {
+//         web_sys::console::log_1(&format!( $($t)*).into())
+//     };
+// }
 
 use wasm_bindgen::prelude::*;
 
@@ -18,6 +18,7 @@ pub struct Universe {
     width: u32,
     height: u32,
     cells: FixedBitSet,
+    next_cells: FixedBitSet, // Added next_cells for double buffering
 }
 
 impl Universe {
@@ -37,11 +38,12 @@ impl Universe {
 impl Universe {
     pub fn new() -> Self {
         utils::set_panic_hook();
-        let width = 300;
-        let height = 150;
+        let width = 600;
+        let height = 300;
 
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
+        let next_cells = FixedBitSet::with_capacity(size); // Initialize next_cells
 
         for i in 0..size {
             cells.set(i, i % 2 == 0 || i % 7 == 0);
@@ -51,6 +53,7 @@ impl Universe {
             width,
             height,
             cells,
+            next_cells, // Initialize next_cells in the struct
         }
     }
 
@@ -92,9 +95,17 @@ impl Universe {
         self.cells.toggle(idx);
     }
 
+    fn get_index(&self, row: u32, column: u32) -> usize {
+        (row * self.width + column) as usize
+    }
+}
+
+#[wasm_bindgen]
+impl Universe {
     pub fn tick(&mut self) {
         utils::Timer::new("Universe::tick");
-        let mut next = self.cells.clone();
+        // Clear next_cells for the new generation
+        self.next_cells.set_range(.., false);
 
         for row in 0..self.height {
             for col in 0..self.width {
@@ -102,89 +113,73 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
-                // log!(
-                //     "cell[{}, {}] is initially {:?} and has {} live neighbors",
-                //     row,
-                //     col,
-                //     cell,
-                //     live_neighbors
-                // );
-
-                next.set(
+                self.next_cells.set(
                     idx,
                     match (cell, live_neighbors) {
+                        // Rule 1: Any live cell with fewer than two live neighbors dies (underpopulation).
                         (true, x) if x < 2 => false,
+                        // Rule 2: Any live cell with two or three live neighbors lives on to the next generation.
                         (true, 2) | (true, 3) => true,
+                        // Rule 3: Any live cell with more than three live neighbors dies (overpopulation).
                         (true, x) if x > 3 => false,
+                        // Rule 4: Any dead cell with exactly three live neighbors becomes a live cell (reproduction).
                         (false, 3) => true,
+                        // All other cases: the cell remains in its current state.
                         (otherwise, _) => otherwise,
                     },
                 );
-
-                // log!("    it becomes {:?}", next);
             }
         }
-        self.cells = next;
+        // Swap cells and next_cells
+        std::mem::swap(&mut self.cells, &mut self.next_cells);
     }
 
-    fn get_index(&self, row: u32, column: u32) -> usize {
-        (row * self.width + column) as usize
-    }
 
     fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
-    
-        let north = if row == 0 {
-            self.height - 1
-        } else {
-            row - 1
-        };
-    
-        let south = if row == self.height - 1 {
-            0
-        } else {
-            row + 1
-        };
-    
+
+        let north = if row == 0 { self.height - 1 } else { row - 1 };
+
+        let south = if row == self.height - 1 { 0 } else { row + 1 };
+
         let west = if column == 0 {
             self.width - 1
         } else {
             column - 1
         };
-    
+
         let east = if column == self.width - 1 {
             0
         } else {
             column + 1
         };
-    
+
         let nw = self.get_index(north, west);
         count += self.cells[nw] as u8;
-    
+
         let n = self.get_index(north, column);
         count += self.cells[n] as u8;
-    
+
         let ne = self.get_index(north, east);
         count += self.cells[ne] as u8;
-    
+
         let w = self.get_index(row, west);
         count += self.cells[w] as u8;
-    
+
         let e = self.get_index(row, east);
         count += self.cells[e] as u8;
-    
+
         let sw = self.get_index(south, west);
         count += self.cells[sw] as u8;
-    
+
         let s = self.get_index(south, column);
         count += self.cells[s] as u8;
-    
+
         let se = self.get_index(south, east);
         count += self.cells[se] as u8;
-    
+
         count
     }
-    
 }
 
 #[test]
