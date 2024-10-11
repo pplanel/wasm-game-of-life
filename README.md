@@ -1,84 +1,75 @@
-<div align="center">
+# WebAssembly Game of Life
 
-  <h1><code>wasm-pack-template</code></h1>
+This project implements Conway's Game of Life using Rust and WebAssembly, rendered with WebGL for high-performance simulation and visualization.
 
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
+## Features
 
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
+- Rust implementation of Game of Life rules
+- WebAssembly compilation for fast execution in the browser
+- WebGL rendering for efficient graphics
+- Interactive controls (play/pause)
+- FPS counter and performance metrics
+- Responsive dark-themed UI
 
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
+## Project Structure
 
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
+- `lib.rs`: Rust implementation of the Game of Life logic
+- `index.js`: JavaScript entry point for the application
+- `index.html`: HTML structure and styling for the web interface
+- `render.js`: WebGL rendering logic (not provided, but referenced)
+- `webgl.js`: WebGL initialization (not provided, but referenced)
+- `controls.js`: UI control setup (not provided, but referenced)
+- `fps.js`: FPS calculation and display (not provided, but referenced)
 
-## About
+## Prerequisites
 
-[**📚 Read this template tutorial! 📚**][template-docs]
+- Rust
+- wasm-pack
+- Node.js and npm
 
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
+## Building and Running
 
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
+1. Compile the Rust code to WebAssembly:
+   ```
+   wasm-pack build
+   ```
 
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
+2. Install JavaScript dependencies:
+   ```
+   npm install
+   ```
 
-## 🚴 Usage
+3. Start the development server:
+   ```
+   npm run start
+   ```
 
-### 🐑 Use `cargo generate` to Clone this Template
+4. Open your browser and navigate to `http://localhost:8080` (or the port specified by your development server).
 
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
+## Usage
 
-```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
-```
+- Click the play/pause button to start or stop the simulation.
+- Toggle the FPS table to view detailed performance metrics.
 
-### 🛠️ Build with `wasm-pack build`
+## Customization
 
-```
-wasm-pack build
-```
+You can modify the simulation parameters in `lib.rs`:
 
-### 🔬 Test in Headless Browsers with `wasm-pack test`
+- Change the grid size by adjusting the `width` and `height` in the `Universe::new()` call.
+- Modify the initial cell pattern in the `Universe::new()` method.
 
-```
-wasm-pack test --headless --firefox
-```
+## Performance
 
-### 🎁 Publish to NPM with `wasm-pack publish`
+The simulation uses several optimization techniques:
 
-```
-wasm-pack publish
-```
+- Double buffering in the Rust code for efficient state updates
+- WebGL for fast rendering of large numbers of cells
+- WebAssembly for near-native performance of the simulation logic
 
-## 🔋 Batteries Included
+## Contributing
 
-* [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) for communicating
-  between WebAssembly and JavaScript.
-* [`console_error_panic_hook`](https://github.com/rustwasm/console_error_panic_hook)
-  for logging panic messages to the developer console.
-* `LICENSE-APACHE` and `LICENSE-MIT`: most Rust projects are licensed this way, so these are included for you
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-Licensed under either of
-
-* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
-
-at your option.
-
-### Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally
-submitted for inclusion in the work by you, as defined in the Apache-2.0
-license, shall be dual licensed as above, without any additional terms or
-conditions.
+This project is open source and available under the [MIT License](LICENSE).
