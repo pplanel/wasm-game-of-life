@@ -13,16 +13,6 @@ This project implements Conway's Game of Life using Rust and WebAssembly, render
 - FPS counter and performance metrics
 - Responsive dark-themed UI
 
-## Project Structure
-
-- `lib.rs`: Rust implementation of the Game of Life logic
-- `index.js`: JavaScript entry point for the application
-- `index.html`: HTML structure and styling for the web interface
-- `render.js`: WebGL rendering logic (not provided, but referenced)
-- `webgl.js`: WebGL initialization (not provided, but referenced)
-- `controls.js`: UI control setup (not provided, but referenced)
-- `fps.js`: FPS calculation and display (not provided, but referenced)
-
 ## Prerequisites
 
 - Rust
