@@ -1,3 +1,5 @@
+![Header](./img/glider.png)
+
 # WebAssembly Game of Life
 
 This project implements Conway's Game of Life using Rust and WebAssembly, rendered with WebGL for high-performance simulation and visualization.
