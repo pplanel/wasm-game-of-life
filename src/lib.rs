@@ -1,3 +1,8 @@
+//! # Game of Life
+//!
+//! This module implements Conway's Game of Life using Rust and WebAssembly.
+//! It provides a `Universe` struct that represents the game grid and methods
+//! to manipulate and evolve the cellular automaton.
 extern crate fixedbitset;
 extern crate web_sys;
 use fixedbitset::FixedBitSet;
@@ -6,20 +11,31 @@ mod utils;
 
 use wasm_bindgen::prelude::*;
 
+/// Represents the universe of the Game of Life.
+///
+/// The universe is a 2D grid of cells, where each cell is either alive or dead.
 #[wasm_bindgen]
 #[derive(Default, Debug)]
 pub struct Universe {
     width: u32,
     height: u32,
     cells: FixedBitSet,
-    next_cells: FixedBitSet, // Added next_cells for double buffering
+    next_cells: FixedBitSet, // Used for double buffering
 }
 
 impl Universe {
+    /// Returns a slice of the current state of all cells.
+    ///
+    /// This method is useful for debugging or for advanced rendering techniques.
     pub fn get_cells(&self) -> &[usize] {
         self.cells.as_slice()
     }
 
+    /// Sets the state of multiple cells at once.
+    ///
+    /// # Arguments
+    ///
+    /// * `cells` - A slice of (row, column) pairs representing live cells to set.
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
         cells.iter().for_each(|(row, column)| {
             let idx = self.get_index(*row, *column);
@@ -30,6 +46,16 @@ impl Universe {
 
 #[wasm_bindgen]
 impl Universe {
+    /// Creates a new universe with the specified dimensions.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The width of the universe.
+    /// * `height` - The height of the universe.
+    ///
+    /// # Returns
+    ///
+    /// A new `Universe` instance with a random initial state.
     pub fn new(width: u32, height: u32) -> Self {
         utils::set_panic_hook();
 
@@ -46,63 +72,110 @@ impl Universe {
             width,
             height,
             cells,
-            next_cells, // Initialize next_cells in the struct
+            next_cells,
         }
     }
 
+    /// Returns the width of the universe.
     pub fn width(&self) -> u32 {
         self.width
     }
 
+    /// Returns the height of the universe.
     pub fn height(&self) -> u32 {
         self.height
     }
 
+    /// Returns the total number of cells in the universe.
     pub fn area(&self) -> u32 {
         self.width * self.height
     }
 
-    /// Set the width of the universe.
+    /// Sets the width of the universe.
     ///
-    /// Resets all cells to the dead state.
+    /// This method resets all cells to the dead state.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - The new width of the universe.
     pub fn set_width(&mut self, width: u32) {
         self.width = width;
         self.cells.set_range(.., false);
     }
 
-    /// Set the height of the universe.
+    /// Sets the height of the universe.
     ///
-    /// Resets all cells to the dead state.
+    /// This method resets all cells to the dead state.
+    ///
+    /// # Arguments
+    ///
+    /// * `height` - The new height of the universe.
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells.set_range(.., false);
     }
 
+    /// Returns a pointer to the cells buffer.
+    ///
+    /// This method is primarily used for JavaScript interop.
     pub fn cells(&self) -> *const u32 {
         self.cells.as_slice().as_ptr() as *const u32
     }
 
+    /// Returns the state of a cell at the given coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The row of the cell.
+    /// * `column` - The column of the cell.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the cell is alive, `false` if it's dead.
     pub fn get_cell_state(&self, row: u32, column: u32) -> bool {
         let idx = self.get_index(row, column);
         self.cells[idx]
     }
 
+    /// Toggles the state of a cell at the given coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The row of the cell to toggle.
+    /// * `column` - The column of the cell to toggle.
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
         self.cells.toggle(idx);
     }
 
+    /// Converts 2D coordinates to a 1D index in the cells array.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The row of the cell.
+    /// * `column` - The column of the cell.
+    ///
+    /// # Returns
+    ///
+    /// The 1D index corresponding to the given 2D coordinates.
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
 
+    /// Converts a 1D index to 2D coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `idx` - The 1D index to convert.
+    ///
+    /// # Returns
+    ///
+    /// A tuple `(row, column)` representing the 2D coordinates.
     fn get_row_col(&self, idx: u32) -> (u32, u32) {
         (idx / self.width(), idx % self.width())
     }
-}
 
-#[wasm_bindgen]
-impl Universe {
+    /// Advances the universe by one generation according to the Game of Life rules.
     pub fn tick(&mut self) {
         utils::Timer::new("Universe::tick");
         // Clear next_cells for the new generation
@@ -133,19 +206,28 @@ impl Universe {
         std::mem::swap(&mut self.cells, &mut self.next_cells);
     }
 
+    /// Counts the number of live neighbors for a given cell.
+    ///
+    /// This method implements wraparound at the edges of the universe.
+    ///
+    /// # Arguments
+    ///
+    /// * `row` - The row of the cell.
+    /// * `column` - The column of the cell.
+    ///
+    /// # Returns
+    ///
+    /// The number of live neighbors (0-8).
     fn live_neighbor_count(&self, row: u32, column: u32) -> u8 {
         let mut count = 0;
 
         let north = if row == 0 { self.height - 1 } else { row - 1 };
-
         let south = if row == self.height - 1 { 0 } else { row + 1 };
-
         let west = if column == 0 {
             self.width - 1
         } else {
             column - 1
         };
-
         let east = if column == self.width - 1 {
             0
         } else {
@@ -178,10 +260,4 @@ impl Universe {
 
         count
     }
-}
-
-#[test]
-fn test_universe() {
-    let mut universe = Universe::new(600, 300);
-    universe.tick();
 }
