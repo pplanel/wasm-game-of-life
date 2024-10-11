@@ -6,3 +6,6 @@ pkg/
 wasm-pack.log
 .direnv
 .aider*
+www/node_modules
+www/dist
+www/.bin/

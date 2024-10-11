@@ -19,13 +19,6 @@ impl Universe {
     pub fn get_cells(&self) -> &[usize] {
         self.cells.as_slice()
     }
-
-    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
-        cells.iter().for_each(|(row, column)| {
-            let idx = self.get_index(*row, *column);
-            self.cells.set(idx, true);
-        });
-    }
 }
 
 #[wasm_bindgen]
@@ -48,6 +41,13 @@ impl Universe {
             cells,
             next_cells, // Initialize next_cells in the struct
         }
+    }
+
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        cells.iter().for_each(|(row, column)| {
+            let idx = self.get_index(*row, *column);
+            self.cells.set(idx, true);
+        });
     }
 
     pub fn width(&self) -> u32 {
