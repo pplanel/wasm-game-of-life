@@ -30,13 +30,15 @@ const fps = new class {
     }
     const mean = sum / this.frames.length;
 
+    const latestFpsCell = document.getElementById("latest-fps");
+    const avgFpsCell = document.getElementById("avg-fps");
+    const minFpsCell = document.getElementById("min-fps");
+    const maxFpsCell = document.getElementById("max-fps");
+
+    latestFpsCell.textContent = Math.round(fps);
+    avgFpsCell.textContent = Math.round(mean);
+    minFpsCell.textContent = Math.round(min);
+    maxFpsCell.textContent = Math.round(max);
     // Render the statistics.
-    this.fps.textContent = `
-Frames per Second:
-latest = ${Math.round(fps)}
-avg of last 100 = ${Math.round(mean)}
-min of last 100 = ${Math.round(min)}
-max of last 100 = ${Math.round(max)}
-`.trim();
   }
 }();

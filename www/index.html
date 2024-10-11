@@ -39,7 +39,7 @@
             color: #8bc34a;
             margin-bottom: 10px;
         }
-        #play-pause {
+        button {
             background-color: #4CAF50;
             border: none;
             color: #1a1a1a;
@@ -53,9 +53,24 @@
             border-radius: 4px;
             transition: background-color 0.3s, box-shadow 0.3s;
         }
-        #play-pause:hover {
+        button:hover {
             background-color: #45a049;
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        #fps-table {
+            display: none;
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        #fps-table th, #fps-table td {
+            border: 1px solid #4CAF50;
+            padding: 8px;
+            text-align: left;
+        }
+        #fps-table th {
+            background-color: #4CAF50;
+            color: #1a1a1a;
         }
     </style>
 </head>
@@ -63,10 +78,50 @@
     <div class="container">
         <h1>Game of Life Simulation</h1>
         <canvas id="game-of-life-canvas"></canvas>
+      <div>
+        <button id="play-pause">⏸</button>
+      <button id="toggle-fps-table">Toggle FPS Table</button>
+      </div>
+           <table id="fps-table">
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Latest FPS</td>
+                <td id="latest-fps"></td>
+            </tr>
+            <tr>
+                <td>Average (last 100)</td>
+                <td id="avg-fps"></td>
+            </tr>
+            <tr>
+                <td>Minimum (last 100)</td>
+                <td id="min-fps"></td>
+            </tr>
+            <tr>
+                <td>Maximum (last 100)</td>
+                <td id="max-fps"></td>
+            </tr>
+        </table>
         <div id="fps"></div>
-        <button id="play-pause">Play/Pause</button>
     </div>
     <script src="./bootstrap.js"></script>
     <script src="./fps.js"></script>
+    <script>
+        // FPS Table Toggle and Update Logic
+        const fpsDiv = document.getElementById('fps');
+        const fpsTable = document.getElementById('fps-table');
+        const toggleFpsTableBtn = document.getElementById('toggle-fps-table');
+        toggleFpsTableBtn.addEventListener('click', () => {
+            if (fpsTable.style.display === 'none' || fpsTable.style.display === '') {
+                fpsTable.style.display = 'table';
+                fpsDiv.style.display = 'none';
+            } else {
+                fpsTable.style.display = 'none';
+                fpsDiv.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html>

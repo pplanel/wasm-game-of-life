@@ -12,10 +12,6 @@ const { gl, shaderProgram, cellBuffer, gridBuffer } = initWebGL(width, height);
 
 const playPauseButton = document.getElementById("play-pause");
 
-// Start the rendering loop
-gl.clearColor(0.1, 0.1, 0.1, 1.0); // Dark gray background
-render(universe, gl, shaderProgram, cellBuffer, gridBuffer);
-
 setupPlayPauseButton(
   playPauseButton,
   render,
@@ -25,3 +21,6 @@ setupPlayPauseButton(
   cellBuffer,
   gridBuffer,
 );
+// Start the rendering loop
+gl.clearColor(0.1, 0.1, 0.1, 1.0); // Dark gray background
+render(universe, gl, shaderProgram, cellBuffer, gridBuffer);
